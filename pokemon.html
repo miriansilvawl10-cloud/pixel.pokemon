@@ -1,0 +1,697 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon - Pokédex</title>
+  <meta name="description" content="Informações detalhadas sobre o Pokémon.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .detail-hero { padding-top: 40px; }
+    .shiny-toggle { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); cursor: pointer; background: none; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 14px; transition: var(--transition); font-family: var(--font-main); }
+    .shiny-toggle.active { border-color: #ca8a04; color: #fbbf24; background: rgba(202,138,4,0.1); }
+    .shiny-toggle:hover { border-color: #ca8a04; color: #fbbf24; }
+    .forms-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+    .form-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); min-width: 100px; }
+    .form-item:hover { border-color: rgba(37,99,235,0.4); background: var(--bg-card-hover); }
+    .form-item.active { border-color: var(--accent-blue); }
+    .form-item img { width: 70px; height: 70px; object-fit: contain; }
+    .form-item span { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; text-transform: capitalize; text-align: center; }
+    .evo-chain-wrap { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; }
+    .error-state { text-align: center; padding: 80px 24px; }
+    .error-state h2 { font-size: 2rem; color: var(--text-secondary); margin-bottom: 12px; }
+    .error-state p { color: var(--text-muted); margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu" role="navigation">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+</div>
+
+<main class="page" id="mainContent">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:50vh">
+    <div style="text-align:center">
+      <div class="loader-pokeball"></div>
+      <p class="loader-text" style="margin-top:20px">Carregando...</p>
+    </div>
+  </div>
+</main>
+
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const pokemonId = parseInt(params.get('id')) || 1;
+
+let currentPokemon = null;
+let currentSpecies = null;
+let showingShiny = false;
+
+// ── Stat bar colors ──────────────────────────────────────────
+function statColor(val) {
+  if (val >= 150) return '#4ade80';
+  if (val >= 100) return '#22d3ee';
+  if (val >= 70) return '#60a5fa';
+  if (val >= 40) return '#a78bfa';
+  return '#f87171';
+}
+
+// ── Load pokemon ─────────────────────────────────────────────
+async function loadPokemon(id) {
+  try {
+    const [poke, species] = await Promise.all([
+      fetchJSON(`${POKEAPI}/pokemon/${id}`),
+      fetchJSON(`${POKEAPI}/pokemon-species/${id}`).catch(() => null)
+    ]);
+    currentPokemon = poke;
+    currentSpecies = species;
+    document.title = `${poke.name.charAt(0).toUpperCase() + poke.name.slice(1)} - Pokédex`;
+    renderDetail(poke, species);
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="container">
+        <div class="error-state">
+          <h2>Pokémon não encontrado</h2>
+          <p>Não foi possível carregar os dados deste Pokémon.</p>
+          <a href="pokedex.html" class="btn-primary">Voltar à Pokédex</a>
+        </div>
+      </div>`;
+  }
+}
+
+function renderDetail(poke, species) {
+  const types = poke.types;
+  const primaryType = types[0]?.type?.name || 'normal';
+  const color = typeColor(primaryType);
+  const imgUrl = getPokemonImage(poke);
+  const imgShiny = getPokemonImageShiny(poke);
+
+  const genText = species?.generation?.name?.replace('generation-','Gen ').toUpperCase() || 'N/D';
+  const habitat = species?.habitat?.name || 'N/D';
+  const category = species?.genera?.find(g => g.language.name === 'en')?.genus || 'N/D';
+  const captureRate = species?.capture_rate ?? 'N/D';
+  const baseExp = poke.base_experience ?? 'N/D';
+  const height = (poke.height / 10).toFixed(1) + ' m';
+  const weight = (poke.weight / 10).toFixed(1) + ' kg';
+
+  const isFav = isFavorite(poke.id);
+
+  const mainContent = document.getElementById('mainContent');
+  mainContent.innerHTML = `
+  <!-- HERO -->
+  <section class="detail-hero">
+    <div class="detail-bg" style="--type-color:${color};background:radial-gradient(ellipse at center,${color} 0%,transparent 70%);opacity:0.1"></div>
+    <div class="detail-bg-pattern"></div>
+    <div class="container">
+      <div style="margin-bottom:24px">
+        <a href="pokedex.html" style="display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);text-decoration:none;font-size:0.78rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Pokédex
+        </a>
+      </div>
+      <div class="detail-hero-inner">
+        <div class="detail-image-section">
+          <div class="detail-main-image">
+            <img id="mainImg" src="${imgUrl || ''}" alt="${poke.name}" width="280" height="280"
+              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyODAiIGhlaWdodD0iMjgwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMxMTE4MjciLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIzMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMWUyZDQwIiBzdHJva2Utd2lkdGg9IjYiLz48bGluZSB4MT0iMjAiIHkxPSI1MCIgeDI9IjgwIiB5Mj0iNTAiIHN0cm9rZT0iIzFlMmQ0MCIgc3Ryb2tlLXdpZHRoPSI2Ii8+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iOCIgZmlsbD0iIzFlMmQ0MCIvPjwvc3ZnPg=='">
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            ${imgShiny ? `<button class="shiny-toggle" id="shinyBtn" onclick="toggleShiny()" aria-label="Alternar versão shiny">Shiny</button>` : ''}
+          </div>
+        </div>
+
+        <div class="detail-info-section">
+          <p class="detail-number">#${padId(poke.id)}</p>
+          <h1 class="detail-name">${poke.name}</h1>
+          <div class="detail-types">
+            ${types.map(t => typeBadge(t.type.name, 'lg')).join('')}
+          </div>
+
+          <div class="detail-meta-grid">
+            <div class="meta-item">
+              <p class="meta-label">Altura</p>
+              <p class="meta-value">${height}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Peso</p>
+              <p class="meta-value">${weight}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Categoria</p>
+              <p class="meta-value" style="text-transform:capitalize">${category}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Geração</p>
+              <p class="meta-value">${genText}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Habitat</p>
+              <p class="meta-value" style="text-transform:capitalize">${habitat}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Exp. Base</p>
+              <p class="meta-value">${baseExp}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Taxa Captura</p>
+              <p class="meta-value">${captureRate}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Lendário</p>
+              <p class="meta-value">${species?.is_legendary ? 'Sim' : 'Não'}</p>
+            </div>
+            <div class="meta-item">
+              <p class="meta-label">Mítico</p>
+              <p class="meta-value">${species?.is_mythical ? 'Sim' : 'Não'}</p>
+            </div>
+          </div>
+
+          <div class="detail-nav-btns">
+            ${poke.id > 1 ? `<a href="pokemon.html?id=${poke.id - 1}" class="btn-prev" aria-label="Pokémon anterior">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              #${padId(poke.id - 1)}
+            </a>` : ''}
+            <button class="btn-favorite ${isFav ? 'active' : ''}" id="favBtn"
+              onclick="toggleFavorite()" aria-label="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}"
+              aria-pressed="${isFav}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              ${isFav ? 'Favorito' : 'Favoritar'}
+            </button>
+            <a href="comparar.html?p1=${poke.id}" class="btn-next" style="margin-left:auto" aria-label="Comparar este Pokémon">
+              Comparar
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="pokemon.html?id=${poke.id + 1}" class="btn-next" aria-label="Próximo Pokémon">
+              #${padId(poke.id + 1)}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <section class="detail-tabs-section">
+    <div class="container">
+      <div class="tabs-nav" role="tablist" aria-label="Seções de informação">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-stats" onclick="switchTab('stats',this)">Estatísticas</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-abilities" onclick="switchTab('abilities',this)">Habilidades</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-moves" onclick="switchTab('moves',this)">Movimentos</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-evolution" onclick="switchTab('evolution',this)">Evolução</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-gallery" onclick="switchTab('gallery',this)">Galeria</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-forms" onclick="switchTab('forms',this)">Formas</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="tab-panel active" id="tab-stats" role="tabpanel">
+        <div class="stats-grid">
+          ${poke.stats.map(s => {
+            const name = s.stat.name.replace('special-attack','Sp. Attack').replace('special-defense','Sp. Defense').replace('hp','HP').replace('attack','Attack').replace('defense','Defense').replace('speed','Speed');
+            const pct = Math.min(100, (s.base_stat / 255) * 100);
+            const col = statColor(s.base_stat);
+            return `<div class="stat-row">
+              <span class="stat-name">${name}</span>
+              <span class="stat-value">${s.base_stat}</span>
+              <div class="stat-bar-bg">
+                <div class="stat-bar-fill" data-pct="${pct}" style="background:${col}"></div>
+              </div>
+            </div>`;
+          }).join('')}
+          <div class="stat-row" style="margin-top:8px;border-top:1px solid var(--border-color);padding-top:16px">
+            <span class="stat-name">Total</span>
+            <span class="stat-value">${poke.stats.reduce((a,s) => a + s.base_stat, 0)}</span>
+            <div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABILITIES -->
+      <div class="tab-panel" id="tab-abilities" role="tabpanel">
+        <div class="abilities-grid" id="abilitiesContainer">
+          <p style="color:var(--text-muted)">Carregando habilidades...</p>
+        </div>
+      </div>
+
+      <!-- MOVES -->
+      <div class="tab-panel" id="tab-moves" role="tabpanel">
+        <div class="moves-filters" role="group" aria-label="Filtrar movimentos">
+          <button class="filter-tab active" data-move-cat="all" aria-pressed="true">Todos</button>
+          <button class="filter-tab" data-move-cat="physical" aria-pressed="false">Físicos</button>
+          <button class="filter-tab" data-move-cat="special" aria-pressed="false">Especiais</button>
+          <button class="filter-tab" data-move-cat="status" aria-pressed="false">Status</button>
+        </div>
+        <div class="moves-table-wrapper">
+          <table class="moves-table" id="movesTable" aria-label="Movimentos do Pokémon">
+            <thead>
+              <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Poder</th>
+                <th scope="col">Precisão</th>
+                <th scope="col">PP</th>
+              </tr>
+            </thead>
+            <tbody id="movesBody">
+              <tr><td colspan="6" style="text-align:center;padding:20px">Carregando movimentos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EVOLUTION -->
+      <div class="tab-panel" id="tab-evolution" role="tabpanel">
+        <div id="evolutionContainer" style="padding:20px 0">
+          <p style="color:var(--text-muted)">Carregando cadeia de evolução...</p>
+        </div>
+      </div>
+
+      <!-- GALLERY -->
+      <div class="tab-panel" id="tab-gallery" role="tabpanel">
+        <div class="gallery-section" id="galleryContainer"></div>
+      </div>
+
+      <!-- FORMS -->
+      <div class="tab-panel" id="tab-forms" role="tabpanel">
+        <div id="formsContainer">
+          <p style="color:var(--text-muted)">Carregando formas alternativas...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-bottom">
+        <p class="footer-disclaimer">Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos. Dados via <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a>. Projeto independente de fãs.</p>
+        <p class="footer-credits"><a href="creditos.html">Créditos</a></p>
+      </div>
+    </div>
+  </footer>
+  `;
+
+  // Animate stat bars
+  setTimeout(() => {
+    document.querySelectorAll('.stat-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 200);
+
+  // Build gallery immediately
+  buildGallery(poke);
+
+  // Load abilities, moves, evolution async
+  loadAbilities(poke);
+  loadMoves(poke);
+  if (species) loadEvolution(species);
+  loadForms(poke, species);
+
+  // Move category filter
+  document.querySelectorAll('[data-move-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-move-cat]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      filterMoves(btn.dataset.moveCat);
+    });
+  });
+}
+
+// ── Tab switching ────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.remove('active');
+    p.setAttribute('aria-hidden', 'true');
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+  });
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('tab-' + id).removeAttribute('aria-hidden');
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+
+  if (id === 'stats') {
+    setTimeout(() => {
+      document.querySelectorAll('.stat-bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.pct + '%';
+      });
+    }, 100);
+  }
+}
+
+// ── Abilities ────────────────────────────────────────────────
+async function loadAbilities(poke) {
+  const container = document.getElementById('abilitiesContainer');
+  if (!container) return;
+
+  try {
+    const details = await Promise.allSettled(
+      poke.abilities.map(a => fetchJSON(a.ability.url))
+    );
+
+    const html = poke.abilities.map((a, i) => {
+      const data = details[i].status === 'fulfilled' ? details[i].value : null;
+      const enEntry = data?.flavor_text_entries?.find(e => e.language.name === 'en');
+      const enEffect = data?.effect_entries?.find(e => e.language.name === 'en');
+      const desc = enEffect?.short_effect || enEntry?.flavor_text || 'Descrição não disponível.';
+
+      return `<div class="ability-card" role="region" aria-label="Habilidade ${a.ability.name}">
+        <div class="ability-header">
+          <span class="ability-name">${a.ability.name.replace(/-/g, ' ')}</span>
+          ${a.is_hidden ? '<span class="hidden-badge">Oculta</span>' : '<span style="padding:3px 8px;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.3);border-radius:100px;font-size:0.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#60a5fa">Normal</span>'}
+        </div>
+        <p class="ability-desc">${desc}</p>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--text-muted)">Erro ao carregar habilidades.</p>';
+  }
+}
+
+// ── Moves ────────────────────────────────────────────────────
+let allMoves = [];
+
+async function loadMoves(poke) {
+  const tbody = document.getElementById('movesBody');
+  if (!tbody) return;
+
+  // Only level-up moves, sorted by level
+  const levelMoves = poke.moves
+    .map(m => {
+      const vd = m.version_group_details.find(v => v.move_learn_method?.name === 'level-up');
+      return vd ? { name: m.move.name, url: m.move.url, level: vd.level_learned_at } : null;
+    })
+    .filter(Boolean)
+    .sort((a,b) => a.level - b.level)
+    .slice(0, 60); // limit for performance
+
+  if (!levelMoves.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhum movimento disponível.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando movimentos...</td></tr>';
+
+  try {
+    const moveDetails = await Promise.allSettled(
+      levelMoves.map(m => fetchJSON(m.url))
+    );
+
+    allMoves = moveDetails.map((r, i) => {
+      if (r.status !== 'fulfilled') return null;
+      const d = r.value;
+      return {
+        name: d.name,
+        type: d.type?.name || '—',
+        category: d.damage_class?.name || '—',
+        power: d.power ?? '—',
+        accuracy: d.accuracy ?? '—',
+        pp: d.pp ?? '—',
+      };
+    }).filter(Boolean);
+
+    renderMovesTable(allMoves);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Erro ao carregar movimentos.</td></tr>';
+  }
+}
+
+function renderMovesTable(moves) {
+  const tbody = document.getElementById('movesBody');
+  if (!tbody) return;
+  if (!moves.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhum resultado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = moves.map(m => `
+    <tr>
+      <td style="color:var(--text-primary);text-transform:capitalize;font-weight:600">${m.name.replace(/-/g,' ')}</td>
+      <td>${typeBadge(m.type)}</td>
+      <td style="text-transform:capitalize">${m.category}</td>
+      <td style="font-family:var(--font-mono)">${m.power}</td>
+      <td style="font-family:var(--font-mono)">${m.accuracy}</td>
+      <td style="font-family:var(--font-mono)">${m.pp}</td>
+    </tr>
+  `).join('');
+}
+
+function filterMoves(cat) {
+  if (cat === 'all') return renderMovesTable(allMoves);
+  renderMovesTable(allMoves.filter(m => m.category === cat));
+}
+
+// ── Evolution ────────────────────────────────────────────────
+async function loadEvolution(species) {
+  const container = document.getElementById('evolutionContainer');
+  if (!container) return;
+
+  try {
+    const chainUrl = species.evolution_chain?.url;
+    if (!chainUrl) { container.innerHTML = '<p style="color:var(--text-muted)">Sem cadeia de evolução.</p>'; return; }
+
+    const chain = await fetchJSON(chainUrl);
+    const html = await buildEvoChainHtml(chain.chain);
+    container.innerHTML = `<div class="evolution-chain">${html}</div>`;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--text-muted)">Erro ao carregar evolução.</p>';
+  }
+}
+
+async function buildEvoChainHtml(node) {
+  if (!node) return '';
+
+  const speciesName = node.species.name;
+  const speciesId = parseInt(node.species.url.split('/').slice(-2,-1)[0]);
+  const imgSrc = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
+
+  let html = `
+    <a href="pokemon.html?id=${speciesId}" class="evo-pokemon" aria-label="${speciesName}">
+      <img src="${imgSrc}" alt="${speciesName}" width="90" height="90"
+           onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${speciesId}.png'">
+      <span class="evo-name">${speciesName}</span>
+      <span class="evo-number">#${padId(speciesId)}</span>
+    </a>`;
+
+  if (node.evolves_to.length === 1) {
+    const detail = node.evolves_to[0].evolution_details?.[0];
+    const trigger = detail?.trigger?.name || '';
+    const minLv = detail?.min_level;
+    const item = detail?.item?.name || detail?.held_item?.name || '';
+    const label = minLv ? `Nv. ${minLv}` : item ? item.replace(/-/g,' ') : trigger.replace(/-/g,' ');
+
+    html += `
+      <div class="evo-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <span>${label}</span>
+      </div>
+    ` + await buildEvoChainHtml(node.evolves_to[0]);
+  } else if (node.evolves_to.length > 1) {
+    const branches = await Promise.all(node.evolves_to.map(n => buildEvoChainHtml(n)));
+    html += `
+      <div class="evo-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+      <div class="evo-branch">${branches.join('')}</div>`;
+  }
+
+  return html;
+}
+
+// ── Gallery ──────────────────────────────────────────────────
+function buildGallery(poke) {
+  const container = document.getElementById('galleryContainer');
+  if (!container) return;
+
+  const sp = poke.sprites;
+  const categories = {
+    'Official Artwork': [
+      sp?.other?.['official-artwork']?.front_default,
+      sp?.other?.['official-artwork']?.front_shiny,
+    ],
+    'Home': [
+      sp?.other?.home?.front_default,
+      sp?.other?.home?.front_shiny,
+      sp?.other?.home?.front_female,
+    ],
+    'Sprites Clássicos': [
+      sp?.front_default,
+      sp?.back_default,
+      sp?.front_shiny,
+      sp?.back_shiny,
+    ],
+    'Sprites Femininos': [
+      sp?.front_female,
+      sp?.back_female,
+      sp?.front_shiny_female,
+      sp?.back_shiny_female,
+    ],
+  };
+
+  const labels = {
+    0: 'Frente', 1: 'Shiny', 2: 'Feminino', 3: 'Costas', 4: 'Costas Shiny',
+    5: 'Fem. Costas', 6: 'Fem. Shiny'
+  };
+
+  let html = '';
+  for (const [cat, imgs] of Object.entries(categories)) {
+    const valid = imgs.filter(Boolean);
+    if (!valid.length) continue;
+    html += `<div class="gallery-category">
+      <p class="gallery-category-title">${cat}</p>
+      <div class="gallery-images">
+        ${valid.map((src, i) => `
+          <div class="gallery-item" tabindex="0" onclick="document.getElementById('mainImg').src='${src}'"
+               onkeypress="if(event.key==='Enter') document.getElementById('mainImg').src='${src}'"
+               role="button" aria-label="Ver imagem ${labels[i] || ''}">
+            <img src="${src}" alt="${poke.name} ${labels[i] || ''}" width="80" height="80" loading="lazy">
+            <span>${labels[i] || ''}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html || '<p style="color:var(--text-muted)">Galeria não disponível.</p>';
+}
+
+// ── Forms ────────────────────────────────────────────────────
+async function loadForms(poke, species) {
+  const container = document.getElementById('formsContainer');
+  if (!container) return;
+
+  try {
+    const varieties = species?.varieties || [];
+    if (varieties.length <= 1) {
+      container.innerHTML = '<p style="color:var(--text-muted)">Este Pokémon não possui formas alternativas.</p>';
+      return;
+    }
+
+    const formData = await Promise.allSettled(
+      varieties.map(v => fetchJSON(v.pokemon.url))
+    );
+
+    const html = formData
+      .filter(r => r.status === 'fulfilled')
+      .map(r => {
+        const p = r.value;
+        const img = getPokemonImage(p) || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+        const isActive = p.id === poke.id ? 'active' : '';
+        return `<div class="form-item ${isActive}" onclick="location.href='pokemon.html?id=${p.id}'"
+                     tabindex="0" onkeypress="if(event.key==='Enter')location.href='pokemon.html?id=${p.id}'"
+                     role="button" aria-label="${p.name}">
+          <img src="${img}" alt="${p.name}" width="70" height="70" loading="lazy"
+               onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png'">
+          <span>${p.name.replace(/-/g,' ')}</span>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center">
+            ${p.types.map(t => typeBadge(t.type.name)).join('')}
+          </div>
+        </div>`;
+      }).join('');
+
+    container.innerHTML = `<div class="forms-row">${html}</div>`;
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--text-muted)">Erro ao carregar formas.</p>';
+  }
+}
+
+// ── Shiny toggle ─────────────────────────────────────────────
+function toggleShiny() {
+  showingShiny = !showingShiny;
+  const btn = document.getElementById('shinyBtn');
+  const img = document.getElementById('mainImg');
+  if (!btn || !img) return;
+  btn.classList.toggle('active', showingShiny);
+  if (showingShiny) {
+    const shiny = getPokemonImageShiny(currentPokemon);
+    if (shiny) img.src = shiny;
+  } else {
+    const normal = getPokemonImage(currentPokemon);
+    if (normal) img.src = normal;
+  }
+}
+
+// ── Favorites ────────────────────────────────────────────────
+function isFavorite(id) {
+  const favs = JSON.parse(localStorage.getItem('pokeFavorites') || '[]');
+  return favs.includes(id);
+}
+
+function toggleFavorite() {
+  const id = currentPokemon.id;
+  const name = currentPokemon.name;
+  let favs = JSON.parse(localStorage.getItem('pokeFavorites') || '[]');
+  const btn = document.getElementById('favBtn');
+  if (favs.includes(id)) {
+    favs = favs.filter(f => f !== id);
+    notify(`${name} removido dos favoritos.`, 'info');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Favoritar`;
+      btn.setAttribute('aria-pressed', 'false');
+    }
+  } else {
+    favs.push(id);
+    notify(`${name} adicionado aos favoritos.`, 'success');
+    if (btn) {
+      btn.classList.add('active');
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Favorito`;
+      btn.setAttribute('aria-pressed', 'true');
+    }
+  }
+  localStorage.setItem('pokeFavorites', JSON.stringify(favs));
+}
+
+loadPokemon(pokemonId);
+</script>
+</body>
+</html>

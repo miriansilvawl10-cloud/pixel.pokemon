@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tipos de Pokémon - Pokédex</title>
+  <meta name="description" content="Explore todos os tipos de Pokémon, suas fraquezas, resistências e imunidades.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .type-detail-panel { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 24px; }
+    .type-detail-panel.open { display: flex; }
+    .type-detail-inner { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); max-width: 800px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative; animation: fadeIn 0.3s ease; }
+    .type-detail-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid var(--border-color); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .type-detail-close:hover { border-color: var(--accent-red); color: var(--accent-red); }
+    .effectiveness-table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 0.8rem; overflow: hidden; border-radius: var(--radius-sm); }
+    .effectiveness-table th, .effectiveness-table td { padding: 8px 12px; border: 1px solid var(--border-color); text-align: center; }
+    .effectiveness-table th { background: rgba(255,255,255,0.04); color: var(--text-muted); font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; }
+    .eff-4x { background: rgba(220,38,38,0.3); color: #fca5a5; font-weight: 800; }
+    .eff-2x { background: rgba(220,38,38,0.15); color: #f87171; font-weight: 700; }
+    .eff-half { background: rgba(34,197,94,0.15); color: #4ade80; font-weight: 700; }
+    .eff-quarter { background: rgba(34,197,94,0.3); color: #86efac; font-weight: 800; }
+    .eff-0x { background: rgba(107,114,128,0.2); color: #9ca3af; font-weight: 700; }
+    .eff-1x { color: var(--text-muted); }
+    .type-pokemon-mini { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .type-poke-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); transition: var(--transition); }
+    .type-poke-item:hover { background: rgba(255,255,255,0.05); }
+    .type-poke-item img { width: 48px; height: 48px; object-fit: contain; }
+    .type-poke-item span { font-size: 0.6rem; color: var(--text-muted); text-transform: capitalize; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu" role="navigation">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="universo.html">Universo</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+</div>
+
+<main class="page">
+  <div class="container">
+    <div class="page-header">
+      <p class="ph-label">Enciclopédia</p>
+      <h1>Tipos de Pokémon</h1>
+      <p>Explore todos os 18 tipos, suas relações de batalha e Pokémon associados</p>
+    </div>
+
+    <div class="types-grid" id="typesGrid" aria-label="Grade de tipos"></div>
+
+    <!-- EFFECTIVENESS TABLE -->
+    <section aria-labelledby="effTableTitle" style="margin-top: 60px">
+      <div class="section-header">
+        <div>
+          <p class="section-label">Referência</p>
+          <h2 class="section-title" id="effTableTitle">Tabela de Efetividade</h2>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:24px">
+        Efetividade dos ataques: cada linha representa o tipo do ataque, cada coluna o tipo do Pokémon defensor.
+      </p>
+      <div style="overflow-x:auto;border:1px solid var(--border-color);border-radius:var(--radius)">
+        <table class="effectiveness-table" id="effTable" aria-label="Tabela de efetividade de tipos">
+          <thead id="effTableHead"></thead>
+          <tbody id="effTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- TYPE DETAIL PANEL -->
+<div class="type-detail-panel" id="typePanel" role="dialog" aria-modal="true" aria-labelledby="panelTypeName">
+  <div class="type-detail-inner">
+    <button class="type-detail-close" onclick="closePanel()" aria-label="Fechar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="panelContent"></div>
+  </div>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos. Dados via <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a>. Projeto independente de fãs.</p>
+      <p class="footer-credits"><a href="creditos.html">Créditos</a></p>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+<script>
+const TYPE_NAMES = ['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+let typeDataCache = {};
+
+// ── Init ─────────────────────────────────────────────────────
+(async function() {
+  const grid = document.getElementById('typesGrid');
+  grid.innerHTML = '<p style="color:var(--text-muted);padding:20px">Carregando tipos...</p>';
+
+  try {
+    const results = await Promise.allSettled(
+      TYPE_NAMES.map(t => fetchJSON(`${POKEAPI}/type/${t}`))
+    );
+
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') typeDataCache[TYPE_NAMES[i]] = r.value;
+    });
+
+    grid.innerHTML = TYPE_NAMES.map(t => buildTypeCard(t, typeDataCache[t])).join('');
+
+    buildEffTable();
+  } catch(e) {
+    grid.innerHTML = '<p style="color:var(--text-muted)">Erro ao carregar tipos.</p>';
+  }
+})();
+
+function buildTypeCard(typeName, data) {
+  const color = typeColor(typeName);
+  const count = data?.pokemon?.length || 0;
+  const dmgFrom = data?.damage_relations || {};
+
+  const weakTo = (dmgFrom.double_damage_from || []).map(t => t.name);
+  const resistTo = (dmgFrom.half_damage_from || []).map(t => t.name);
+  const immuneTo = (dmgFrom.no_damage_from || []).map(t => t.name);
+
+  return `<div class="type-card" onclick="openTypePanel('${typeName}')" tabindex="0"
+       onkeypress="if(event.key==='Enter') openTypePanel('${typeName}')"
+       role="button" aria-label="Ver detalhes do tipo ${typeName}">
+    <div class="type-card-header" style="background:linear-gradient(135deg,${color},${color}aa)">
+      <span class="type-card-name">${typeName}</span>
+      <span class="type-card-count">${count} Pokémon</span>
+    </div>
+    <div class="type-card-body">
+      ${weakTo.slice(0,3).map(t => `<span class="relation-badge weak" title="Fraqueza">x2 ${t}</span>`).join('')}
+      ${resistTo.slice(0,3).map(t => `<span class="relation-badge resist" title="Resistência">½ ${t}</span>`).join('')}
+      ${immuneTo.map(t => `<span class="relation-badge immune" title="Imunidade">0 ${t}</span>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function openTypePanel(typeName) {
+  const panel = document.getElementById('typePanel');
+  const content = document.getElementById('panelContent');
+  panel.classList.add('open');
+  content.innerHTML = '<p style="color:var(--text-muted)">Carregando...</p>';
+
+  const data = typeDataCache[typeName];
+  if (!data) return;
+
+  const color = typeColor(typeName);
+  const dmgFrom = data.damage_relations;
+  const dmgTo = data.damage_relations;
+
+  const weakTo = dmgFrom.double_damage_from.map(t => t.name);
+  const resistTo = dmgFrom.half_damage_from.map(t => t.name);
+  const immuneTo = dmgFrom.no_damage_from.map(t => t.name);
+  const superEff = dmgTo.double_damage_to.map(t => t.name);
+  const notVery = dmgTo.half_damage_to.map(t => t.name);
+  const noEff = dmgTo.no_damage_to.map(t => t.name);
+
+  // Sample pokemon
+  const samplePoke = data.pokemon.slice(0,12).map(p => {
+    const id = parseInt(p.pokemon.url.split('/').slice(-2,-1)[0]);
+    return { name: p.pokemon.name, id };
+  });
+
+  content.innerHTML = `
+    <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:24px">
+      <span style="padding:8px 24px;background:${color};border-radius:100px;color:#fff;font-size:1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase">${typeName}</span>
+      <span style="font-size:0.8rem;color:var(--text-muted)">${data.pokemon.length} Pokémon</span>
+    </div>
+    <h2 id="panelTypeName" style="display:none">${typeName}</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <div>
+        <p style="font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Como Atacante</p>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Super efetivo (x2):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          ${superEff.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhum</span>'}
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Pouco efetivo (x0.5):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          ${notVery.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhum</span>'}
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Sem efeito (x0):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${noEff.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhum</span>'}
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Como Defensor</p>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Fraquezas (x2):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          ${weakTo.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhuma</span>'}
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Resistências (x0.5):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          ${resistTo.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhuma</span>'}
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">Imunidades (x0):</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${immuneTo.map(t => `<span class="type-badge type-${t}" style="background:${typeColor(t)}">${t}</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.8rem">Nenhuma</span>'}
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:0.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Pokémon deste tipo</p>
+    <div class="type-pokemon-mini">
+      ${samplePoke.map(p => `
+        <div class="type-poke-item" onclick="openPokemon(${p.id})" tabindex="0"
+             onkeypress="if(event.key==='Enter') openPokemon(${p.id})"
+             role="button" aria-label="${p.name}">
+          <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png"
+               alt="${p.name}" width="48" height="48" loading="lazy">
+          <span>${p.name}</span>
+        </div>
+      `).join('')}
+      ${data.pokemon.length > 12 ? `<a href="pokedex.html?type=${typeName}" style="display:flex;align-items:center;padding:8px 16px;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.2);border-radius:var(--radius-sm);color:var(--accent-blue);font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none">+${data.pokemon.length - 12} mais</a>` : ''}
+    </div>
+  `;
+}
+
+function closePanel() {
+  document.getElementById('typePanel').classList.remove('open');
+}
+
+document.getElementById('typePanel').addEventListener('click', e => {
+  if (e.target === document.getElementById('typePanel')) closePanel();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ── Effectiveness Table ───────────────────────────────────────
+function buildEffTable() {
+  const head = document.getElementById('effTableHead');
+  const body = document.getElementById('effTableBody');
+
+  head.innerHTML = `<tr>
+    <th scope="col" style="min-width:80px">Atk \\ Def</th>
+    ${TYPE_NAMES.map(t => `<th scope="col" title="${t}" style="background:${typeColor(t)};color:#fff;font-size:0.6rem;letter-spacing:0;padding:6px 4px;min-width:36px">${t.slice(0,3).toUpperCase()}</th>`).join('')}
+  </tr>`;
+
+  body.innerHTML = TYPE_NAMES.map(attackType => {
+    const atkData = typeDataCache[attackType];
+    if (!atkData) return '';
+
+    const superEff = new Set((atkData.damage_relations.double_damage_to || []).map(t => t.name));
+    const notVery = new Set((atkData.damage_relations.half_damage_to || []).map(t => t.name));
+    const noEff = new Set((atkData.damage_relations.no_damage_to || []).map(t => t.name));
+
+    return `<tr>
+      <th scope="row" style="background:${typeColor(attackType)};color:#fff;font-size:0.68rem;font-weight:700;letter-spacing:1px;padding:6px 8px;text-align:left">${attackType}</th>
+      ${TYPE_NAMES.map(defType => {
+        let cls = 'eff-1x', label = '1';
+        if (noEff.has(defType)) { cls = 'eff-0x'; label = '0'; }
+        else if (notVery.has(defType)) { cls = 'eff-half'; label = '½'; }
+        else if (superEff.has(defType)) { cls = 'eff-2x'; label = '2'; }
+        return `<td class="${cls}" style="font-size:0.75rem;font-weight:600;padding:6px 4px">${label}</td>`;
+      }).join('')}
+    </tr>`;
+  }).join('');
+}
+
+// Open type from URL param
+const params = new URLSearchParams(location.search);
+const typeParam = params.get('type');
+if (typeParam && TYPE_NAMES.includes(typeParam)) {
+  // wait for data load
+  window.addEventListener('load', () => setTimeout(() => openTypePanel(typeParam), 500));
+}
+</script>
+</body>
+</html>

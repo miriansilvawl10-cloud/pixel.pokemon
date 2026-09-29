@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokédex - Enciclopédia do Universo Pokémon | Todos os Pokémon</title>
+  <meta name="description" content="Explore todos os Pokémon com estatísticas, habilidades, movimentos, evoluções, tipos, gerações e muito mais. Pokédex completa em português.">
+  <meta name="keywords" content="pokédex, pokémon, pokémon database, pokémon stats, pokéapi, pokémon em português">
+  <meta property="og:title" content="Pokédex - Universo Pokémon">
+  <meta property="og:description" content="Enciclopédia digital completa do universo Pokémon. Dados via PokéAPI.">
+  <meta property="og:type" content="website">
+
+  <!-- Fontes — Press Start 2P para título pixel art, Nunito para texto, Share Tech Mono para números -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* ── Título principal — pixel art ── */
+    .hero-title .line2 {
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    /* ── Overlay de entrada preta ── */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 99999;
+      pointer-events: all;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+
+    #intro-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #intro-overlay { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Overlay de entrada preta -->
+<div id="intro-overlay" aria-hidden="true"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+      <li><a href="contato.html">Contato</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menu mobile">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="universo.html">Universo</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+  <a href="contato.html">Contato</a>
+  <a href="creditos.html">Créditos</a>
+</div>
+
+<main class="page">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Destaque principal">
+    <div class="hero-bg-grid" aria-hidden="true"></div>
+    <div class="hero-bg-orbs" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge" style="display:none" aria-hidden="true"></div>
+      <h1 class="hero-title">
+        <span class="line2">UNIVERSO POKÉMON</span>
+      </h1>
+      <p class="hero-subtitle">
+        Descubra Pokémon, habilidades, movimentos, estatísticas, evoluções, tipos e muito mais.
+      </p>
+      <div class="hero-search">
+        <div class="hero-search-wrapper">
+          <svg class="search-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="search" id="heroSearch" placeholder="Pesquisar Pokémon..." aria-label="Pesquisar Pokémon">
+          <div class="autocomplete-list" id="heroAutocomplete" style="display:none"></div>
+        </div>
+        <button class="hero-search-btn" onclick="goSearch()" aria-label="Buscar">Buscar</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="value" id="heroStatTotal">—</span>
+          <span class="label">Pokémon</span>
+        </div>
+        <div class="hero-divider" aria-hidden="true"></div>
+        <div class="hero-stat">
+          <span class="value">18</span>
+          <span class="label">Tipos</span>
+        </div>
+        <div class="hero-divider" aria-hidden="true"></div>
+        <div class="hero-stat">
+          <span class="value">9</span>
+          <span class="label">Gerações</span>
+        </div>
+        <div class="hero-divider" aria-hidden="true"></div>
+        <div class="hero-stat">
+          <span class="value">9</span>
+          <span class="label">Regiões</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTÓRIA POKÉMON — zigue-zague -->
+  <section class="historia-section" aria-labelledby="historiaTitle">
+    <div class="container">
+      <div class="historia-header">
+        <p class="section-label">Desde 1996</p>
+        <h2 class="section-title" id="historiaTitle">A História do Universo Pokémon</h2>
+        <p class="historia-intro">Uma jornada que começou no Japão e conquistou o mundo inteiro.</p>
+      </div>
+
+      <!-- Bloco 1 — Imagem esquerda, texto direita -->
+      <div class="historia-bloco" data-dir="left">
+        <div class="historia-img-wrap" aria-hidden="true">
+          <div class="historia-img-frame">
+            <img
+              data-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Pikachu — o Pokémon mais famoso do mundo"
+              class="historia-img" loading="lazy" width="320" height="320">
+            <div class="historia-img-glow" style="--glow-color:rgba(234,179,8,0.35)"></div>
+            <div class="historia-img-badge">1996</div>
+          </div>
+        </div>
+        <div class="historia-texto">
+          <span class="historia-tag">Origem</span>
+          <h3 class="historia-titulo">Satoshi Tajiri e o Sonho das Criaturas de Bolso</h3>
+          <p>
+            Tudo começou com um garoto de Machida, Tóquio, que adorava colecionar insetos.
+            <strong>Satoshi Tajiri</strong> viu a natureza ao redor desaparecer com a urbanização e
+            sonhou criar um jogo onde crianças pudessem explorar e colecionar criaturas.
+            Junto com seu amigo e designer <strong>Ken Sugimori</strong>, fundou a
+            <strong>Game Freak</strong> e, após seis anos de desenvolvimento e apoio da Nintendo,
+            lançou <em>Pocket Monsters Red &amp; Green</em> no Japão em
+            <strong>27 de fevereiro de 1996</strong>.
+          </p>
+          <p>
+            O conceito era simples: capture, treine, evolua e batalhe com criaturas chamadas Pokémon.
+            Com 151 espécies originais e o cabo Link Cable permitindo trocas entre cartuchos do Game Boy,
+            a franquia nasceu como um fenômeno de interação social — muito antes das redes sociais.
+          </p>
+          <a href="universo.html#origem" class="historia-link" aria-label="Saiba mais sobre a origem do Pokémon">
+            Saiba mais
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Bloco 2 — Texto esquerda, imagem direita -->
+      <div class="historia-bloco" data-dir="right">
+        <div class="historia-texto">
+          <span class="historia-tag">Os Jogos</span>
+          <h3 class="historia-titulo">Nove Gerações, Nove Regiões, Infinitas Aventuras</h3>
+          <p>
+            De <strong>Kanto</strong> a <strong>Paldea</strong>, cada geração trouxe uma região nova
+            inspirada em lugares reais — do Japão ao Reino Unido, passando pelo Havaí e pela
+            Península Ibérica. As mecânicas evoluíram: Mega Evoluções, Z-Moves, Dynamax,
+            Terastallizing — mas a essência permaneceu a mesma.
+          </p>
+          <p>
+            Com mais de <strong>480 milhões de jogos vendidos</strong>, Pokémon é a franquia de
+            videogame mais bem-sucedida da história. De <em>Red &amp; Blue</em> no Game Boy até
+            <em>Scarlet &amp; Violet</em> no Switch, cada jogo é uma porta de entrada para
+            um mundo novo, com centenas de horas de exploração garantidas.
+          </p>
+          <a href="geracoes.html" class="historia-link" aria-label="Explorar todas as gerações">
+            Ver gerações
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="historia-img-wrap" aria-hidden="true">
+          <div class="historia-img-frame">
+            <img
+              data-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Charizard — um dos Pokémon mais icônicos dos jogos"
+              class="historia-img" loading="lazy" width="320" height="320">
+            <div class="historia-img-glow" style="--glow-color:rgba(249,115,22,0.35)"></div>
+            <div class="historia-img-badge">+480M jogos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3 — Imagem esquerda, texto direita -->
+      <div class="historia-bloco" data-dir="left">
+        <div class="historia-img-wrap" aria-hidden="true">
+          <div class="historia-img-frame">
+            <img
+              data-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Mewtwo — protagonista do primeiro filme Pokémon"
+              class="historia-img" loading="lazy" width="320" height="320">
+            <div class="historia-img-glow" style="--glow-color:rgba(168,85,247,0.35)"></div>
+            <div class="historia-img-badge">1997 · Anime</div>
+          </div>
+        </div>
+        <div class="historia-texto">
+          <span class="historia-tag">O Anime &amp; Os Filmes</span>
+          <h3 class="historia-titulo">Ash, Pikachu e uma Jornada de 25 Anos</h3>
+          <p>
+            Em <strong>1º de abril de 1997</strong>, estreou na TV Tokyo o anime Pokémon.
+            <strong>Ash Ketchum</strong> e seu Pikachu relutante partiram de Pallet Town com um
+            único objetivo: se tornar o Mestre Pokémon. A série foi transmitida em
+            <strong>mais de 169 países</strong> e, em janeiro de 2023, Ash finalmente venceu o
+            Campeonato Mundial — encerrando 25 anos de jornada com lágrimas de toda uma geração.
+          </p>
+          <p>
+            Os filmes expandiram esse universo: <em>Mewtwo Contra-Ataca</em> (1998) emocionou
+            ao explorar identidade e livre-arbítrio. <em>O Poder de Um</em> trouxe Lugia das
+            profundezas. E <em>Pokémon: Detetive Pikachu</em> (2019), o live-action com
+            Ryan Reynolds, arrecadou mais de <strong>$433 milhões</strong> globalmente.
+          </p>
+          <a href="universo.html#anime" class="historia-link" aria-label="Saiba mais sobre o anime">
+            Ver o anime
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Bloco 4 — Texto esquerda, imagem direita -->
+      <div class="historia-bloco" data-dir="right">
+        <div class="historia-texto">
+          <span class="historia-tag">Cultura Pop</span>
+          <h3 class="historia-titulo">TCG, Pokémon GO e a Franquia Mais Lucrativa do Mundo</h3>
+          <p>
+            O <strong>Card Game (TCG)</strong>, lançado em 1996, já imprimiu mais de
+            <strong>43 bilhões de cartas</strong>. Uma única carta Pikachu Illustrator foi vendida
+            por <strong>$5,2 milhões</strong> em 2022. Em julho de 2016, <strong>Pokémon GO</strong>
+            literalmente tirou milhões de pessoas de casa — atingindo $1 bilhão em receita em
+            apenas dois meses, o mais rápido da história dos apps mobile.
+          </p>
+          <p>
+            Com mais de <strong>$150 bilhões</strong> em receita total acumulada, Pokémon é a
+            <strong>franquia de mídia mais lucrativa do mundo</strong> — à frente de Hello Kitty,
+            Star Wars e Marvel. Pikachu é reconhecido por mais de 96% das crianças americanas,
+            mais do que o próprio Mickey Mouse.
+          </p>
+          <a href="universo.html#cultura" class="historia-link" aria-label="Explorar a cultura pop Pokémon">
+            Explorar cultura
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="historia-img-wrap" aria-hidden="true">
+          <div class="historia-img-frame">
+            <img
+              data-src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt="Bulbasaur — o Pokémon número 1 da Pokédex"
+              class="historia-img" loading="lazy" width="320" height="320">
+            <div class="historia-img-glow" style="--glow-color:rgba(34,197,94,0.35)"></div>
+            <div class="historia-img-badge">$150B+</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="section" aria-labelledby="featuredTitle">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <p class="section-label">Destaque</p>
+          <h2 class="section-title" id="featuredTitle">Pokémon em Destaque</h2>
+        </div>
+        <a href="pokedex.html" class="section-link" aria-label="Ver todos os Pokémon">
+          Ver todos
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
+      <div class="pokemon-grid" id="featuredGrid" aria-label="Pokémon em destaque">
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+        <div class="card-skeleton"><div class="skeleton sk-image"></div><div class="skeleton sk-line medium"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line medium" style="height:30px;margin-top:12px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPES QUICK NAV -->
+  <section class="section" style="padding-top:0" aria-labelledby="typesNavTitle">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <p class="section-label">Explorar</p>
+          <h2 class="section-title" id="typesNavTitle">Tipos de Pokémon</h2>
+        </div>
+        <a href="tipos.html" class="section-link">Ver página de tipos</a>
+      </div>
+      <div id="typesNav" style="display:flex;gap:10px;flex-wrap:wrap" role="list" aria-label="Tipos de Pokémon"></div>
+    </div>
+  </section>
+
+  <!-- QUICK LINKS -->
+  <section class="section" style="padding-top:0" aria-labelledby="quickLinksTitle">
+    <div class="container">
+      <h2 class="section-title" id="quickLinksTitle" style="margin-bottom:28px">Explorar o Universo</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px">
+        <a href="lendarios.html" class="quick-card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:28px;text-decoration:none;display:flex;flex-direction:column;gap:12px;transition:var(--transition)" onmouseover="this.style.borderColor='rgba(220,38,38,0.4)'" onmouseout="this.style.borderColor='var(--border-color)'">
+          <span style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f87171">Especial</span>
+          <span style="font-size:1.2rem;font-weight:800;color:var(--text-primary)">Pokémon Lendários</span>
+          <span style="font-size:0.85rem;color:var(--text-secondary)">Os seres mais poderosos do universo Pokémon.</span>
+        </a>
+        <a href="lendarios.html#miticos" class="quick-card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:28px;text-decoration:none;display:flex;flex-direction:column;gap:12px;transition:var(--transition)" onmouseover="this.style.borderColor='rgba(124,58,237,0.4)'" onmouseout="this.style.borderColor='var(--border-color)'">
+          <span style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#a78bfa">Especial</span>
+          <span style="font-size:1.2rem;font-weight:800;color:var(--text-primary)">Pokémon Míticos</span>
+          <span style="font-size:0.85rem;color:var(--text-secondary)">Criaturas raras envoltas em lenda e mistério.</span>
+        </a>
+        <a href="comparar.html" class="quick-card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:28px;text-decoration:none;display:flex;flex-direction:column;gap:12px;transition:var(--transition)" onmouseover="this.style.borderColor='rgba(37,99,235,0.4)'" onmouseout="this.style.borderColor='var(--border-color)'">
+          <span style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent-blue)">Ferramenta</span>
+          <span style="font-size:1.2rem;font-weight:800;color:var(--text-primary)">Comparar Pokémon</span>
+          <span style="font-size:0.85rem;color:var(--text-secondary)">Compare estatísticas, tipos e habilidades lado a lado.</span>
+        </a>
+        <a href="favoritos.html" class="quick-card" style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius);padding:28px;text-decoration:none;display:flex;flex-direction:column;gap:12px;transition:var(--transition)" onmouseover="this.style.borderColor='rgba(37,99,235,0.4)'" onmouseout="this.style.borderColor='var(--border-color)'">
+          <span style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent-blue)">Coleção</span>
+          <span style="font-size:1.2rem;font-weight:800;color:var(--text-primary)">Meus Favoritos</span>
+          <span style="font-size:0.85rem;color:var(--text-secondary)">Salve e gerencie sua coleção pessoal de Pokémon.</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo" style="font-size:1.2rem">
+          <span class="logo-dot" aria-hidden="true"></span>
+          <span>POKÉDEX</span>
+        </a>
+        <p>Enciclopédia digital do universo Pokémon. Dados obtidos via PokéAPI. Projeto independente de fãs.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Explorar</h4>
+        <ul>
+          <li><a href="pokedex.html">Pokédex Completa</a></li>
+          <li><a href="tipos.html">Tipos</a></li>
+          <li><a href="geracoes.html">Gerações</a></li>
+          <li><a href="regioes.html">Regiões</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Especial</h4>
+        <ul>
+          <li><a href="lendarios.html">Lendários</a></li>
+          <li><a href="lendarios.html#miticos">Míticos</a></li>
+          <li><a href="comparar.html">Comparar</a></li>
+          <li><a href="favoritos.html">Favoritos</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Sobre</h4>
+        <ul>
+          <li><a href="creditos.html">Créditos e Fontes</a></li>
+          <li><a href="contato.html">Contato</a></li>
+          <li><a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">
+        Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos (Nintendo, Creatures Inc., GAME FREAK inc. e The Pokémon Company). Este projeto é uma enciclopédia independente criada por fãs e não possui afiliação, patrocínio ou aprovação oficial. Os dados são obtidos via PokéAPI (pokeapi.co), de acordo com seus termos de uso. As imagens exibidas são provenientes dos recursos fornecidos pela PokéAPI.
+      </p>
+      <p class="footer-credits">Dados: <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a></p>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<!-- Scripts existentes — não modificados -->
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+
+<!-- Script de entrada preta simples -->
+<script>
+(function introBlack() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var ov = document.getElementById('intro-overlay');
+    if (ov) ov.remove();
+    return;
+  }
+
+  var overlay = document.getElementById('intro-overlay');
+  if (!overlay) return;
+
+  document.body.style.overflow = 'hidden';
+
+  // Assim que o DOM estiver pronto, faz fade-out da tela preta
+  window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      overlay.classList.add('fade-out');
+      document.body.style.overflow = '';
+      setTimeout(function() {
+        overlay.remove();
+      }, 1100);
+    }, 400);
+  });
+})();
+</script>
+
+<!-- Script de funcionalidades da página inicial (inalterado) -->
+<script>
+(async function() {
+  // Load total count
+  try {
+    const data = await fetchJSON(`${POKEAPI}/pokemon?limit=1`);
+    document.getElementById('heroStatTotal').textContent = data.count.toLocaleString('pt-BR');
+  } catch(e) {}
+
+  // Types navigation
+  const typeNames = ['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+  const tnav = document.getElementById('typesNav');
+  tnav.innerHTML = typeNames.map(t => `
+    <a href="tipos.html?type=${t}" role="listitem"
+       style="padding:8px 18px;background:${typeColor(t)};border-radius:100px;color:#fff;font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;transition:all 0.2s;opacity:0.85"
+       onmouseover="this.style.opacity='1';this.style.transform='translateY(-2px)'"
+       onmouseout="this.style.opacity='0.85';this.style.transform=''"
+       aria-label="Ver Pokémon do tipo ${t}">${t}</a>
+  `).join('');
+
+  // Featured Pokemon - random selection from first 898
+  const featuredGrid = document.getElementById('featuredGrid');
+  featuredGrid.innerHTML = skeletonCards(8);
+
+  try {
+    const ids = new Set();
+    while (ids.size < 8) ids.add(Math.floor(Math.random() * 898) + 1);
+
+    const featured = await Promise.allSettled(
+      [...ids].map(id => fetchJSON(`${POKEAPI}/pokemon/${id}`))
+    );
+
+    const cards = featured
+      .filter(r => r.status === 'fulfilled')
+      .map((r, i) => buildCard(r.value, i * 60));
+
+    featuredGrid.innerHTML = cards.join('');
+    observeCardImages();
+  } catch(e) {
+    featuredGrid.innerHTML = '<p style="color:var(--text-muted);padding:20px">Erro ao carregar Pokémon.</p>';
+  }
+
+  // Hero search autocomplete
+  let allPokemonList = null;
+  const heroInput = document.getElementById('heroSearch');
+  const heroAC = document.getElementById('heroAutocomplete');
+
+  async function loadList() {
+    if (allPokemonList) return allPokemonList;
+    const data = await fetchJSON(`${POKEAPI}/pokemon?limit=10000`);
+    allPokemonList = data.results.map((p, i) => ({
+      name: p.name,
+      id: parseInt(p.url.split('/').slice(-2, -1)[0]),
+    }));
+    return allPokemonList;
+  }
+
+  heroInput.addEventListener('input', debounce(async (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (q.length < 2) { heroAC.style.display = 'none'; return; }
+    const list = await loadList();
+    const matches = list.filter(p =>
+      p.name.includes(q) || String(p.id).startsWith(q)
+    ).slice(0, 8);
+
+    if (!matches.length) { heroAC.style.display = 'none'; return; }
+
+    heroAC.innerHTML = matches.map(p => `
+      <div class="autocomplete-item" onclick="openPokemon(${p.id})" tabindex="0"
+           onkeypress="if(event.key==='Enter') openPokemon(${p.id})"
+           role="option" aria-label="${p.name}">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png"
+             alt="${p.name}" width="36" height="36" loading="lazy">
+        <span class="ac-name">${p.name}</span>
+        <span class="ac-num">#${padId(p.id)}</span>
+      </div>
+    `).join('');
+    heroAC.style.display = 'block';
+  }, 300));
+
+  document.addEventListener('click', (e) => {
+    if (!heroInput.contains(e.target)) heroAC.style.display = 'none';
+  });
+
+  heroInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') goSearch();
+  });
+})();
+
+function goSearch() {
+  const q = document.getElementById('heroSearch').value.trim();
+  if (q) window.location.href = `pokedex.html?q=${encodeURIComponent(q)}`;
+  else window.location.href = 'pokedex.html';
+}
+</script>
+</body>
+</html>

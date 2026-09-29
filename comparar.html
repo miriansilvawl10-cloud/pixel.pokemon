@@ -1,0 +1,367 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparar Pokémon - Pokédex</title>
+  <meta name="description" content="Compare dois Pokémon lado a lado com estatísticas, tipos e habilidades.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .compare-slot-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 300px; gap: 12px; color: var(--text-muted);
+    }
+    .compare-slot-placeholder svg { width: 60px; height: 60px; opacity: 0.3; }
+    .compare-slot-placeholder p { font-size: 0.85rem; }
+    .chart-bar-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .compare-header-row {
+      display: grid; grid-template-columns: 1fr 120px 1fr;
+      padding: 16px 24px; border-bottom: 2px solid var(--border-color);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .compare-header-row .left-name { color: var(--accent-blue); }
+    .compare-header-row .center-label { text-align: center; color: var(--text-muted); }
+    .compare-header-row .right-name { color: #a78bfa; text-align: right; }
+    .slot-search-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm); max-height: 200px; overflow-y: auto; z-index: 100;
+    }
+    .slot-search-dropdown .ac-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .slot-search-dropdown .ac-item:hover { background: rgba(37,99,235,0.08); }
+    .slot-search-dropdown .ac-item img { width: 32px; height: 32px; object-fit: contain; }
+    .slot-search-dropdown .ac-item span { font-size: 0.82rem; text-transform: capitalize; color: var(--text-primary); }
+    .compare-info-row {
+      display: grid; grid-template-columns: 1fr 120px 1fr;
+      padding: 10px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); gap: 8px;
+      align-items: center;
+    }
+    .compare-info-row:last-child { border-bottom: none; }
+    .cir-left { text-align: right; font-size: 0.85rem; color: var(--text-primary); font-weight: 700; }
+    .cir-center { text-align: center; font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+    .cir-right { font-size: 0.85rem; color: var(--text-primary); font-weight: 700; }
+    .winner-left .cir-left, .winner-right .cir-right { color: #4ade80; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu" role="navigation">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+</div>
+
+<main class="page">
+  <div class="container">
+    <div class="page-header">
+      <p class="ph-label">Ferramenta</p>
+      <h1>Comparar Pokémon</h1>
+      <p>Compare dois Pokémon lado a lado com estatísticas, tipos e habilidades</p>
+    </div>
+
+    <!-- SELECTION -->
+    <div class="comparator-layout" id="comparatorLayout">
+      <!-- SLOT 1 -->
+      <div class="compare-slot" id="slot1">
+        <div class="compare-slot-placeholder">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+            <circle cx="50" cy="50" r="30"/><line x1="20" y1="50" x2="80" y2="50"/>
+            <line x1="50" y1="20" x2="50" y2="80" stroke-dasharray="4 4"/>
+            <circle cx="50" cy="50" r="8" fill="currentColor"/>
+          </svg>
+          <p>Selecionar Pokémon 1</p>
+        </div>
+        <div class="compare-slot-search" style="position:relative">
+          <input type="search" id="search1" placeholder="Buscar Pokémon..." aria-label="Buscar primeiro Pokémon"
+                 style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:0.9rem;font-family:var(--font-main);outline:none">
+          <div class="slot-search-dropdown" id="drop1" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- VS -->
+      <div class="compare-divider">
+        <span class="vs-text">VS</span>
+      </div>
+
+      <!-- SLOT 2 -->
+      <div class="compare-slot" id="slot2">
+        <div class="compare-slot-placeholder">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+            <circle cx="50" cy="50" r="30"/><line x1="20" y1="50" x2="80" y2="50"/>
+            <line x1="50" y1="20" x2="50" y2="80" stroke-dasharray="4 4"/>
+            <circle cx="50" cy="50" r="8" fill="currentColor"/>
+          </svg>
+          <p>Selecionar Pokémon 2</p>
+        </div>
+        <div class="compare-slot-search" style="position:relative">
+          <input type="search" id="search2" placeholder="Buscar Pokémon..." aria-label="Buscar segundo Pokémon"
+                 style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:0.9rem;font-family:var(--font-main);outline:none">
+          <div class="slot-search-dropdown" id="drop2" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARISON RESULTS -->
+    <div id="comparisonResults" style="display:none">
+      <!-- STAT BARS -->
+      <div class="compare-stats-section" id="statBars" style="margin-bottom:24px">
+        <div class="compare-header-row">
+          <span class="left-name" id="leftName">Pokémon 1</span>
+          <span class="center-label">Estatística</span>
+          <span class="right-name" id="rightName">Pokémon 2</span>
+        </div>
+        <div id="statRows"></div>
+        <div class="compare-info-row" id="totalRow"></div>
+      </div>
+
+      <!-- DETAILS -->
+      <div class="compare-stats-section" id="detailRows">
+        <div class="compare-header-row">
+          <span class="left-name" id="leftName2">Pokémon 1</span>
+          <span class="center-label">Atributo</span>
+          <span class="right-name" id="rightName2">Pokémon 2</span>
+        </div>
+        <div id="detailRowsContent"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos. Dados via <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a>. Projeto independente de fãs.</p>
+      <p class="footer-credits"><a href="creditos.html">Créditos</a></p>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+<script>
+let pokemon1 = null;
+let pokemon2 = null;
+let allList = null;
+
+async function getList() {
+  if (allList) return allList;
+  const d = await fetchJSON(`${POKEAPI}/pokemon?limit=10000`);
+  allList = d.results.map(p => ({
+    name: p.name,
+    id: parseInt(p.url.split('/').slice(-2,-1)[0])
+  }));
+  return allList;
+}
+
+function setupSearch(inputId, dropId, slotNum) {
+  const input = document.getElementById(inputId);
+  const drop = document.getElementById(dropId);
+
+  input.addEventListener('input', debounce(async (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (q.length < 2) { drop.style.display = 'none'; return; }
+    const list = await getList();
+    const matches = list.filter(p => p.name.includes(q) || String(p.id).startsWith(q)).slice(0,8);
+    if (!matches.length) { drop.style.display = 'none'; return; }
+    drop.innerHTML = matches.map(p => `
+      <div class="ac-item" onclick="selectPokemon(${slotNum}, ${p.id})" tabindex="0"
+           onkeypress="if(event.key==='Enter') selectPokemon(${slotNum}, ${p.id})"
+           role="option" aria-label="${p.name}">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png"
+             alt="${p.name}" width="32" height="32" loading="lazy">
+        <span>${p.name}</span>
+        <span style="margin-left:auto;font-size:0.7rem;color:var(--text-muted);font-family:var(--font-mono)">#${padId(p.id)}</span>
+      </div>
+    `).join('');
+    drop.style.display = 'block';
+  }, 250));
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target)) drop.style.display = 'none';
+  });
+}
+
+setupSearch('search1', 'drop1', 1);
+setupSearch('search2', 'drop2', 2);
+
+async function selectPokemon(slot, id) {
+  document.getElementById(`drop${slot}`).style.display = 'none';
+  const poke = await fetchJSON(`${POKEAPI}/pokemon/${id}`);
+  if (slot === 1) pokemon1 = poke;
+  else pokemon2 = poke;
+
+  renderSlot(slot, poke);
+  if (pokemon1 && pokemon2) renderComparison();
+}
+
+function renderSlot(slot, poke) {
+  const slotEl = document.getElementById(`slot${slot}`);
+  const img = getPokemonImage(poke) ||
+    `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png`;
+  const color = slot === 1 ? 'var(--accent-blue)' : '#7c3aed';
+
+  slotEl.innerHTML = `
+    <div style="text-align:center;padding:8px 0">
+      <p style="font-size:0.7rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px">#${padId(poke.id)}</p>
+      <img src="${img}" alt="${poke.name}" width="160" height="160"
+           style="filter:drop-shadow(0 12px 24px rgba(0,0,0,0.5))"
+           onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${poke.id}.png'">
+      <h3 style="font-size:1.4rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:${color};margin:8px 0">${poke.name}</h3>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+        ${poke.types.map(t => typeBadge(t.type.name)).join('')}
+      </div>
+    </div>
+    <div class="compare-slot-search" style="position:relative">
+      <input type="search" id="search${slot}" placeholder="Trocar Pokémon..." aria-label="Trocar Pokémon ${slot}"
+             style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:0.9rem;font-family:var(--font-main);outline:none">
+      <div class="slot-search-dropdown" id="drop${slot}" style="display:none"></div>
+    </div>
+  `;
+  setupSearch(`search${slot}`, `drop${slot}`, slot);
+}
+
+function renderComparison() {
+  const p1 = pokemon1, p2 = pokemon2;
+  document.getElementById('comparisonResults').style.display = 'block';
+
+  const statNames = {
+    'hp': 'HP', 'attack': 'Attack', 'defense': 'Defense',
+    'special-attack': 'Sp. Attack', 'special-defense': 'Sp. Defense', 'speed': 'Speed'
+  };
+
+  const leftName = p1.name.toUpperCase();
+  const rightName = p2.name.toUpperCase();
+  document.getElementById('leftName').textContent = leftName;
+  document.getElementById('rightName').textContent = rightName;
+  document.getElementById('leftName2').textContent = leftName;
+  document.getElementById('rightName2').textContent = rightName;
+
+  let total1 = 0, total2 = 0;
+
+  const rows = p1.stats.map(s => {
+    const v1 = s.base_stat;
+    const s2 = p2.stats.find(x => x.stat.name === s.stat.name);
+    const v2 = s2 ? s2.base_stat : 0;
+    total1 += v1; total2 += v2;
+    const maxVal = Math.max(v1, v2, 100);
+    const pct1 = (v1 / maxVal * 100).toFixed(1);
+    const pct2 = (v2 / maxVal * 100).toFixed(1);
+    const winnerCls = v1 > v2 ? 'winner-left' : v2 > v1 ? 'winner-right' : '';
+    return `<div class="compare-stat-row ${winnerCls}">
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px">
+        <span class="compare-val-left ${v1 > v2 ? 'winner' : ''}">${v1}</span>
+        <div style="width:80px">
+          <div class="compare-bar left" style="width:${pct1}%"></div>
+        </div>
+      </div>
+      <span class="compare-stat-name">${statNames[s.stat.name] || s.stat.name}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:80px">
+          <div class="compare-bar right" style="width:${pct2}%"></div>
+        </div>
+        <span class="compare-val-right ${v2 > v1 ? 'winner' : ''}">${v2}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('statRows').innerHTML = rows;
+
+  const winnerTotalCls = total1 > total2 ? 'winner-left' : total2 > total1 ? 'winner-right' : '';
+  document.getElementById('totalRow').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;gap:8px;padding:14px 24px;background:rgba(255,255,255,0.03)">
+      <span style="text-align:right;font-size:1rem;font-weight:800;font-family:var(--font-mono);color:${total1 >= total2 ? '#4ade80' : 'var(--text-primary)'}">${total1}</span>
+      <span style="text-align:center;font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted)">Total</span>
+      <span style="font-size:1rem;font-weight:800;font-family:var(--font-mono);color:${total2 >= total1 ? '#4ade80' : 'var(--text-primary)'}">${total2}</span>
+    </div>
+  `;
+
+  // Detail rows
+  const height1 = (p1.height / 10).toFixed(1) + ' m';
+  const height2 = (p2.height / 10).toFixed(1) + ' m';
+  const weight1 = (p1.weight / 10).toFixed(1) + ' kg';
+  const weight2 = (p2.weight / 10).toFixed(1) + ' kg';
+  const types1 = p1.types.map(t => typeBadge(t.type.name)).join(' ');
+  const types2 = p2.types.map(t => typeBadge(t.type.name)).join(' ');
+  const abil1 = p1.abilities.map(a => a.ability.name.replace(/-/g,' ')).join(', ');
+  const abil2 = p2.abilities.map(a => a.ability.name.replace(/-/g,' ')).join(', ');
+
+  document.getElementById('detailRowsContent').innerHTML = `
+    <div class="compare-info-row ${p1.height > p2.height ? 'winner-left' : p2.height > p1.height ? 'winner-right' : ''}">
+      <span class="cir-left">${height1}</span>
+      <span class="cir-center">Altura</span>
+      <span class="cir-right">${height2}</span>
+    </div>
+    <div class="compare-info-row ${p1.weight > p2.weight ? 'winner-left' : p2.weight > p1.weight ? 'winner-right' : ''}">
+      <span class="cir-left">${weight1}</span>
+      <span class="cir-center">Peso</span>
+      <span class="cir-right">${weight2}</span>
+    </div>
+    <div class="compare-info-row">
+      <div class="cir-left" style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap">${types1}</div>
+      <span class="cir-center">Tipos</span>
+      <div class="cir-right" style="display:flex;gap:4px;flex-wrap:wrap">${types2}</div>
+    </div>
+    <div class="compare-info-row">
+      <span class="cir-left" style="font-size:0.78rem;text-transform:capitalize">${abil1}</span>
+      <span class="cir-center">Habilidades</span>
+      <span class="cir-right" style="font-size:0.78rem;text-transform:capitalize">${abil2}</span>
+    </div>
+    <div class="compare-info-row ${p1.base_experience > p2.base_experience ? 'winner-left' : p2.base_experience > p1.base_experience ? 'winner-right' : ''}">
+      <span class="cir-left">${p1.base_experience ?? 'N/D'}</span>
+      <span class="cir-center">Exp. Base</span>
+      <span class="cir-right">${p2.base_experience ?? 'N/D'}</span>
+    </div>
+  `;
+
+  document.getElementById('comparisonResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// URL params
+const params = new URLSearchParams(location.search);
+const p1Id = params.get('p1');
+const p2Id = params.get('p2');
+if (p1Id) selectPokemon(1, parseInt(p1Id));
+if (p2Id) selectPokemon(2, parseInt(p2Id));
+</script>
+</body>
+</html>

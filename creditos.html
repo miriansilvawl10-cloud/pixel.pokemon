@@ -1,0 +1,191 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créditos e Fontes - Pokédex</title>
+  <meta name="description" content="Informações sobre fontes de dados, créditos e avisos de direitos autorais da Pokédex.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu" role="navigation">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+</div>
+
+<main class="page">
+  <div class="container">
+    <div class="page-header">
+      <p class="ph-label">Transparência</p>
+      <h1>Créditos e Fontes</h1>
+      <p>Informações sobre origem dos dados e avisos de propriedade intelectual</p>
+    </div>
+
+    <div class="credits-section">
+
+      <!-- DATA SOURCE -->
+      <div class="credits-card">
+        <h2>Fonte de Dados</h2>
+        <p>
+          Todos os dados exibidos neste projeto — incluindo informações sobre Pokémon, estatísticas, habilidades,
+          movimentos, evoluções, tipos, gerações e regiões — são obtidos exclusivamente por meio da
+          <strong><a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a></strong>,
+          uma API pública e gratuita para dados do universo Pokémon.
+        </p>
+        <p>
+          Nenhum dado é inserido manualmente. Toda a informação é buscada dinamicamente via requisições HTTP
+          aos endpoints oficiais da PokéAPI (<code style="font-family:var(--font-mono);font-size:0.85em;color:var(--accent-blue)">https://pokeapi.co/api/v2/</code>).
+        </p>
+        <p>
+          Documentação da PokéAPI: <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener noreferrer">pokeapi.co/docs/v2</a>
+        </p>
+      </div>
+
+      <!-- IMAGES -->
+      <div class="credits-card">
+        <h2>Imagens</h2>
+        <p>
+          As imagens dos Pokémon exibidas neste projeto são URLs retornadas diretamente pela PokéAPI nos campos
+          <code style="font-family:var(--font-mono);font-size:0.85em;color:var(--accent-blue)">sprites</code> de cada Pokémon,
+          incluindo o repositório público de sprites disponibilizado pela PokéAPI
+          (<a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener noreferrer">github.com/PokeAPI/sprites</a>).
+        </p>
+        <p>
+          As imagens de "official-artwork" são obtidas do mesmo repositório público de sprites da PokéAPI.
+          Nenhuma imagem é baixada ou armazenada localmente neste projeto.
+        </p>
+        <p>
+          Nenhuma imagem é obtida do site oficial da Pokémon Company, do Google Images ou de outras fontes não autorizadas.
+        </p>
+        <p style="font-size:0.82rem;color:var(--text-muted)">
+          Nota: As imagens de Pokémon são propriedade de seus respectivos detentores de direitos. Este projeto
+          as referencia conforme disponibilizadas pela PokéAPI para fins educacionais e de fan project.
+          Não afirmamos que essas imagens possuem licença comercial livre.
+        </p>
+      </div>
+
+      <!-- IP NOTICE -->
+      <div class="credits-card">
+        <h2>Aviso de Propriedade Intelectual</h2>
+        <div class="disclaimer">
+          <p>
+            <strong>Pokémon</strong> e todos os nomes dos personagens Pokémon são marcas registradas de seus
+            respectivos detentores de direitos, incluindo mas não se limitando a:
+            <strong>Nintendo Co., Ltd.</strong>, <strong>Creatures Inc.</strong>,
+            <strong>GAME FREAK inc.</strong> e <strong>The Pokémon Company</strong>.
+          </p>
+          <p style="margin-top:12px">
+            Este projeto é uma <strong>enciclopédia digital independente criada por fãs</strong> (fan project)
+            e <strong>não possui afiliação, patrocínio, endosso ou aprovação oficial</strong> por parte da
+            Nintendo, Creatures Inc., GAME FREAK inc., The Pokémon Company ou qualquer entidade associada.
+          </p>
+          <p style="margin-top:12px">
+            Este projeto não tem fins comerciais. Nenhum conteúdo oficial protegido por direitos autorais
+            foi reproduzido, armazenado ou redistribuído. Os dados são consultados dinamicamente via API pública.
+          </p>
+        </div>
+      </div>
+
+      <!-- TECH -->
+      <div class="credits-card">
+        <h2>Tecnologias Utilizadas</h2>
+        <p>Este projeto foi desenvolvido com tecnologias web padrão:</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:12px">
+          <li style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary)">
+            <span style="width:8px;height:8px;background:var(--accent-blue);border-radius:50%;flex-shrink:0"></span>
+            HTML5, CSS3 e JavaScript puro (sem frameworks)
+          </li>
+          <li style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary)">
+            <span style="width:8px;height:8px;background:var(--accent-blue);border-radius:50%;flex-shrink:0"></span>
+            PokéAPI — <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">pokeapi.co</a> (dados)
+          </li>
+          <li style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary)">
+            <span style="width:8px;height=8px;background:var(--accent-blue);border-radius:50%;flex-shrink:0"></span>
+            Google Fonts — Rajdhani, Share Tech Mono (tipografia)
+          </li>
+          <li style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary)">
+            <span style="width:8px;height:8px;background:var(--accent-blue);border-radius:50%;flex-shrink:0"></span>
+            Intersection Observer API (lazy loading)
+          </li>
+          <li style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--text-secondary)">
+            <span style="width:8px;height:8px;background:var(--accent-blue);border-radius:50%;flex-shrink:0"></span>
+            localStorage (favoritos persistentes)
+          </li>
+        </ul>
+      </div>
+
+      <!-- TERMS -->
+      <div class="credits-card">
+        <h2>Termos de Uso da PokéAPI</h2>
+        <p>
+          A PokéAPI é uma API pública e gratuita. Ao utilizá-la, este projeto segue suas diretrizes de uso,
+          incluindo o limite de requisições e o uso não comercial.
+        </p>
+        <p>
+          Para mais informações sobre os termos de uso da PokéAPI, acesse:
+          <a href="https://pokeapi.co/docs/v2" target="_blank" rel="noopener noreferrer">pokeapi.co/docs/v2</a>
+        </p>
+        <p>
+          A PokéAPI não é afiliada à Nintendo, Creatures Inc., GAME FREAK inc. ou The Pokémon Company.
+          Os dados disponíveis na PokéAPI são compilados e mantidos pela comunidade de desenvolvedores.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">
+        Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos (Nintendo, Creatures Inc., GAME FREAK inc. e The Pokémon Company). Este projeto é uma enciclopédia independente criada por fãs e não possui afiliação, patrocínio ou aprovação oficial. Os dados são obtidos via PokéAPI (pokeapi.co), de acordo com seus termos de uso.
+      </p>
+      <p class="footer-credits">Dados: <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a></p>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+</body>
+</html>

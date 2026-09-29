@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerações - Pokédex</title>
+  <meta name="description" content="Explore todas as gerações de Pokémon, da Geração I até a mais recente.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="Navegação principal">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="Pokédex - Início">
+      <span class="logo-dot" aria-hidden="true"></span>
+      <span>POKÉDEX</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Início</a></li>
+      <li><a href="pokedex.html">Pokédex</a></li>
+      <li><a href="tipos.html">Tipos</a></li>
+      <li><a href="geracoes.html">Gerações</a></li>
+      <li><a href="regioes.html">Regiões</a></li>
+      <li><a href="lendarios.html">Lendários</a></li>
+      <li><a href="universo.html">Universo</a></li>
+      <li><a href="comparar.html">Comparar</a></li>
+      <li><a href="favoritos.html">Favoritos</a></li>
+    </ul>
+    <button class="nav-menu-btn" id="menuBtn" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu" role="navigation">
+  <a href="index.html">Início</a>
+  <a href="pokedex.html">Pokédex</a>
+  <a href="tipos.html">Tipos</a>
+  <a href="geracoes.html">Gerações</a>
+  <a href="regioes.html">Regiões</a>
+  <a href="lendarios.html">Lendários</a>
+  <a href="universo.html">Universo</a>
+  <a href="comparar.html">Comparar</a>
+  <a href="favoritos.html">Favoritos</a>
+</div>
+
+<main class="page">
+  <div class="container">
+    <div class="page-header">
+      <p class="ph-label">História</p>
+      <h1>Gerações de Pokémon</h1>
+      <p>Da Geração I (Kanto) à Geração IX (Paldea) e além</p>
+    </div>
+
+    <div class="generations-grid" id="gensGrid" aria-label="Grade de gerações"></div>
+
+    <!-- GEN DETAIL -->
+    <section id="genDetail" style="display:none;margin-top:60px" aria-labelledby="genDetailTitle">
+      <div class="section-header">
+        <div>
+          <p class="section-label" id="genDetailLabel"></p>
+          <h2 class="section-title" id="genDetailTitle"></h2>
+        </div>
+        <button class="section-link" onclick="closeGenDetail()" aria-label="Fechar detalhes">
+          Fechar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div id="genDetailLoading" style="text-align:center;padding:40px">
+        <div class="loader-pokeball" style="margin:0 auto"></div>
+        <p class="loader-text" style="margin-top:16px">Carregando Pokémon...</p>
+      </div>
+      <div class="pokemon-grid" id="genPokemonGrid" style="display:none" aria-label="Pokémon da geração"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">Pokémon e todos os nomes de personagens Pokémon são marcas registradas de seus respectivos detentores de direitos. Dados via <a href="https://pokeapi.co" target="_blank" rel="noopener noreferrer">PokéAPI</a>. Projeto independente de fãs.</p>
+      <p class="footer-credits"><a href="creditos.html">Créditos</a></p>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+<script src="js/enhancements.js"></script>
+<script>
+const GEN_INFO = [
+  { num: 'I', id: 1, name: 'Geração I', region: 'Kanto', range: [1,151], games: 'Red, Blue, Yellow', color: '#dc2626' },
+  { num: 'II', id: 2, name: 'Geração II', region: 'Johto', range: [152,251], games: 'Gold, Silver, Crystal', color: '#2563eb' },
+  { num: 'III', id: 3, name: 'Geração III', region: 'Hoenn', range: [252,386], games: 'Ruby, Sapphire, Emerald', color: '#16a34a' },
+  { num: 'IV', id: 4, name: 'Geração IV', region: 'Sinnoh', range: [387,493], games: 'Diamond, Pearl, Platinum', color: '#7c3aed' },
+  { num: 'V', id: 5, name: 'Geração V', region: 'Unova', range: [494,649], games: 'Black, White', color: '#0891b2' },
+  { num: 'VI', id: 6, name: 'Geração VI', region: 'Kalos', range: [650,721], games: 'X, Y', color: '#d97706' },
+  { num: 'VII', id: 7, name: 'Geração VII', region: 'Alola', range: [722,809], games: 'Sun, Moon', color: '#db2777' },
+  { num: 'VIII', id: 8, name: 'Geração VIII', region: 'Galar', range: [810,905], games: 'Sword, Shield', color: '#4f46e5' },
+  { num: 'IX', id: 9, name: 'Geração IX', region: 'Paldea', range: [906,1010], games: 'Scarlet, Violet', color: '#ea580c' },
+];
+
+const gensGrid = document.getElementById('gensGrid');
+gensGrid.innerHTML = GEN_INFO.map(g => `
+  <div class="gen-card" onclick="loadGen(${g.id})" tabindex="0"
+       onkeypress="if(event.key==='Enter') loadGen(${g.id})"
+       role="button" aria-label="${g.name} - ${g.region}"
+       style="border-left: 3px solid ${g.color}">
+    <div class="gen-card-header">
+      <p class="gen-number" style="color:${g.color}">Geração ${g.num}</p>
+      <p class="gen-name">${g.region}</p>
+      <p class="gen-region">${g.games}</p>
+    </div>
+    <div class="gen-card-body">
+      <div>
+        <p class="gen-count">${g.range[1] - g.range[0] + 1}</p>
+        <p class="gen-count-label">Pokémon</p>
+      </div>
+      <div style="text-align:right">
+        <p style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">#${padId(g.range[0])} - #${padId(g.range[1])}</p>
+        <p style="font-size:0.8rem;color:var(--accent-blue);font-weight:600;margin-top:4px;letter-spacing:1px">Ver Pokémon</p>
+      </div>
+    </div>
+  </div>
+`).join('');
+
+async function loadGen(genId) {
+  const genInfo = GEN_INFO.find(g => g.id === genId);
+  const [min, max] = genInfo.range;
+
+  document.getElementById('genDetailLabel').textContent = `Geração ${genInfo.num}`;
+  document.getElementById('genDetailTitle').textContent = `${genInfo.region} (${genInfo.games})`;
+
+  const section = document.getElementById('genDetail');
+  section.style.display = 'block';
+  document.getElementById('genDetailLoading').style.display = 'block';
+  document.getElementById('genPokemonGrid').style.display = 'none';
+
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Fetch all IDs in range
+  const ids = [];
+  for (let i = min; i <= Math.min(max, 1010); i++) ids.push(i);
+
+  const grid = document.getElementById('genPokemonGrid');
+  grid.innerHTML = '';
+
+  // Batch fetch
+  const BATCH = 30;
+  for (let i = 0; i < ids.length; i += BATCH) {
+    const batch = ids.slice(i, i + BATCH);
+    const results = await Promise.allSettled(batch.map(id => fetchJSON(`${POKEAPI}/pokemon/${id}`)));
+    results.forEach((r, j) => {
+      if (r.status !== 'fulfilled') return;
+      grid.insertAdjacentHTML('beforeend', buildCard(r.value, j * 40));
+    });
+    observeCardImages();
+    // Show grid after first batch
+    if (i === 0) {
+      document.getElementById('genDetailLoading').style.display = 'none';
+      grid.style.display = 'grid';
+    }
+  }
+}
+
+function closeGenDetail() {
+  document.getElementById('genDetail').style.display = 'none';
+}
+</script>
+</body>
+</html>
